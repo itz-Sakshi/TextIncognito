@@ -6,9 +6,17 @@ import { authOptions } from '../../auth/[...nextauth]/options';
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { messageid: string } }
 ) {
-  const messageId = params.messageid;
+  // Extract `messageid` from the request URL
+  const { pathname } = new URL(request.url);
+  const messageId = String(pathname.split("/").pop()); // Get last part of URL
+  
+  if (!messageId) {
+    return Response.json(
+      { message: "Invalid message ID", success: false },
+      { status: 400 }
+    );
+  }
   await dbConnect();
   const session = await getServerSession(authOptions);
   const _user: User = session?.user as User;
